@@ -1,0 +1,64 @@
+hydra:
+  run:
+    dir: checkpoints/${model.name}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+datasets:
+  hf_repo: KRAFTON/RAON-TTS-Pool
+  local_cache_dir: null             # set to local path to skip re-download
+  configs: null                     # null = all sub-datasets; or list e.g. [LibriHeavy, HiFiTTS]
+  split: core                       # "core" (85% quality-filtered) or "pool" (all)
+  nonredist_dirs: []                # local dirs prepared with prepare_nonredist_datasets.py
+                                    # e.g. [/data/GigaSpeech, /data/SPGISpeech]
+  batch_size_per_gpu: 14000
+  batch_size_type: frame
+  max_samples: 64
+  num_workers: 16
+
+optim:
+  learning_rate: 1e-4
+  num_warmup_updates: 50000         # 5% of max_updates
+  max_updates: 1000000
+  total_updates_per_epoch: 184527   # 6 nodes x 8 GPU x bs14000 frames
+  epochs: 1000                      # effectively unlimited; stops at max_updates
+  grad_accumulation_steps: 1
+  max_grad_norm: 1.0
+  bnb_optimizer: False
+
+model:
+  name: 0.3B
+  tokenizer: custom
+  tokenizer_path: src/f5_tts/data/vocab.txt
+  backbone: DiT
+  arch:
+    dim: 1024
+    depth: 22
+    heads: 16
+    ff_mult: 2
+    text_dim: 512
+    text_mask_padding: True
+    qk_norm: null
+    conv_layers: 4
+    pe_attn_head: null
+    attn_mask_enabled: False
+    checkpoint_activations: False
+    logit_softcapping: null
+    post_norm: False
+    norm_type: rmsnorm
+  mel_spec:
+    target_sample_rate: 16000
+    n_mel_channels: 80
+    hop_length: 256
+    win_length: 1024
+    n_fft: 1024
+    mel_spec_type: sbhifigan16k
+  vocoder:
+    is_local: True
+    local_path: null
+
+ckpts:
+  logger: tensorboard
+  log_samples: True
+  save_per_updates: 5000
+  keep_last_n_checkpoints: -1
+  last_per_updates: 50000
+  save_dir: checkpoints/${model.name}
