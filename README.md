@@ -142,8 +142,7 @@ bash src/f5_tts/eval/run_infer_eval.sh
 
 ## Data
 
-**Raon-OpenTTS-Pool** (615K hours, 11 English speech datasets) is publicly available on HuggingFace:
-[https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Pool](https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Pool)
+**Raon-OpenTTS-Pool** (615K hours, 11 English speech datasets) is publicly available on [HuggingFace](https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Pool)
 
 **Raon-OpenTTS-Core** (510.1K hours, 194.5M segments) is the quality-filtered subset used for training. It is obtained by applying a combined filter based on DNSMOS, WER, and VAD rank scores, removing the bottom 15% of Raon-OpenTTS-Pool. The `core` split in the HuggingFace dataset corresponds to Raon-OpenTTS-Core.
 
