@@ -10,10 +10,12 @@
 
 **Open Models and Data for Robust Text-to-Speech**
 
-[![arXiv](https://img.shields.io/badge/arXiv-Paper-red)](https://arxiv.org/)
-[![Model 0.3B](https://img.shields.io/badge/HuggingFace-RAON--TTS--0.3B-yellow)](https://huggingface.co/KRAFTON/Raon-OpenTTS-0.3B)
-[![Model 1B](https://img.shields.io/badge/HuggingFace-RAON--TTS--1B-yellow)](https://huggingface.co/KRAFTON/Raon-OpenTTS-1B)
-[![Dataset](https://img.shields.io/badge/HuggingFace-RAON--TTS--Pool-blue)](https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Pool)
+[![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-KRAFTON-yellow?style=flat)](https://huggingface.co/KRAFTON)
+[![Model 0.3B](https://img.shields.io/badge/Model-Raon--OpenTTS--0.3B-blue?style=flat)](https://huggingface.co/KRAFTON/Raon-OpenTTS-0.3B)
+[![Dataset](https://img.shields.io/badge/Dataset-Raon--OpenTTS--Pool-blue?style=flat)](https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Pool)
+[![Eval](https://img.shields.io/badge/Eval-Raon--OpenTTS--Eval-blue?style=flat)](https://huggingface.co/datasets/KRAFTON/Raon-OpenTTS-Eval)
+
+**Technical Report (Coming soon)** | **Raon-OpenTTS-1B (Coming soon)**
 
 ## Highlights
 
@@ -156,9 +158,10 @@ This project is licensed under [Apache 2.0](LICENSE).
 ## Citation
 
 ```bibtex
-@article{raonopentts2026,
-    title={Raon-OpenTTS: Open Models and Data for Robust Text-to-Speech},
-    author={},
-    year={2026}
+@article{raon2026opentts,
+    title={Raon-OpenTTS: Open Models and Data for Robust Text-to-Speech},
+    author={TBD},
+    year={2026},
+    url={https://github.com/krafton-ai/Raon-OpenTTS
 }
 ```
