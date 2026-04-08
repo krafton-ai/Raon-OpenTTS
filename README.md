@@ -49,7 +49,7 @@ TBD
 
 ### Raon-OpenTTS-Eval
 
-Covers 4 acoustic regimes (Clean, Noisy, Wild, Emotional) across 12 datasets with 6K prompt-text pairs.
+Covers 4 acoustic regimes (Clean, Noisy, Wild, Expressive) across 12 datasets with 6K prompt-text pairs.
 
 TBD
 
@@ -133,7 +133,7 @@ We evaluate on 3 benchmarks measuring intelligibility (WER) and speaker similari
 |-----------|---------|-------------|
 | Seed-TTS-Eval (EN) | WER (Whisper-large-v3), SIM (WavLM-large) | Standard zero-shot TTS evaluation with cross-sentence prompts |
 | CV3-Eval | WER, SIM (ERes2Net), DNSMOS | CV3-EN and CV3-Hard-EN subsets with diverse speakers |
-| Raon-OpenTTS-Eval | WER, SIM | 4 acoustic regimes (Clean, Noisy, Wild, Emotional), 12 datasets, 6K prompt-text pairs |
+| Raon-OpenTTS-Eval | WER, SIM | 4 acoustic regimes (Clean, Noisy, Wild, Expressive), 12 datasets, 6K prompt-text pairs |
 
 ```bash
 # Run evaluation across all benchmarks
