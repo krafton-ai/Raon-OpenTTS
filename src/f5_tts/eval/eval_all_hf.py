@@ -71,9 +71,9 @@ DATASETS_INFO = {
     "ami-ihm": {"domain": "WILD", "type": "hf"},
     "switchboard": {"domain": "WILD", "type": "hf"},
     "tedlium3_test": {"domain": "NOISY", "type": "hf"},
-    "crema-d": {"domain": "EMOTIONAL", "type": "hf"},
-    "EmoV_DB": {"domain": "EMOTIONAL", "type": "hf"},
-    "expresso": {"domain": "EMOTIONAL", "type": "hf"},
+    "crema-d": {"domain": "EXPRESSIVE", "type": "hf"},
+    "EmoV_DB": {"domain": "EXPRESSIVE", "type": "hf"},
+    "expresso": {"domain": "EXPRESSIVE", "type": "hf"},
     "vctk": {"domain": "CLEAN", "type": "hf"},
 }
 
