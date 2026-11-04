@@ -123,7 +123,7 @@ if ckpt_path.endswith(".safetensors"):
     ckpt = {"ema_model_state_dict": ema_state}
 else:
     # .pt, .pth also loaded safely on CPU
-    ckpt = torch.load(ckpt_path, map_location="cpu")
+    ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=True)
 
 if "ema_model_state_dict" not in ckpt:
     raise RuntimeError("Checkpoint does not contain 'ema_model_state_dict'.")
