@@ -248,17 +248,22 @@ class ConvPositionEmbedding(nn.Module):
 
     def forward(self, x: float["b n d"], mask: bool["b n"] | None = None):
         if mask is not None:
-            mask = mask[..., None]
+            mask = mask[:, None, :]  # 'b n -> b 1 n'
+
+        x = x.permute(0, 2, 1)  # b n d -> b d n
+        conv1, act1, conv2, act2 = self.conv1d
+
+        # zero the padding in front of each conv, as the conv's own zero padding does for a sequence alone
+        if mask is not None:
+            x = x.masked_fill(~mask, 0.0)
+        x = act1(conv1(x))
+        if mask is not None:
+            x = x.masked_fill(~mask, 0.0)
+        x = act2(conv2(x))
+        if mask is not None:
             x = x.masked_fill(~mask, 0.0)
 
-        x = x.permute(0, 2, 1)
-        x = self.conv1d(x)
-        out = x.permute(0, 2, 1)
-
-        if mask is not None:
-            out = out.masked_fill(~mask, 0.0)
-
-        return out
+        return x.permute(0, 2, 1)  # b d n -> b n d
 
 
 # rotary positional embedding related
@@ -299,8 +304,10 @@ class GRN(nn.Module):
         self.gamma = nn.Parameter(torch.zeros(1, 1, dim))
         self.beta = nn.Parameter(torch.zeros(1, 1, dim))
 
-    def forward(self, x):
-        Gx = torch.norm(x, p=2, dim=1, keepdim=True)
+    def forward(self, x: float["b n d"], mask: bool["b n"] | None = None):
+        # with a mask (batch padding), the norm runs over each sequence's own positions only
+        xm = x.masked_fill(~mask[..., None], 0.0) if mask is not None else x
+        Gx = torch.norm(xm, p=2, dim=1, keepdim=True)
         Nx = Gx / (Gx.mean(dim=-1, keepdim=True) + 1e-6)
         return self.gamma * (x * Nx) + self.beta + x
 
@@ -327,15 +334,17 @@ class ConvNeXtV2Block(nn.Module):
         self.grn = GRN(intermediate_dim)
         self.pwconv2 = nn.Linear(intermediate_dim, dim)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor, mask: bool["b n"] | None = None) -> torch.Tensor:
         residual = x
+        if mask is not None:  # zero the batch padding, as the conv's own zero padding does for a sequence alone
+            x = x.masked_fill(~mask[..., None], 0.0)
         x = x.transpose(1, 2)  # b n d -> b d n
         x = self.dwconv(x)
         x = x.transpose(1, 2)  # b d n -> b n d
         x = self.norm(x)
         x = self.pwconv1(x)
         x = self.act(x)
-        x = self.grn(x)
+        x = self.grn(x, mask=mask)
         x = self.pwconv2(x)
         return residual + x
 
@@ -572,12 +581,15 @@ class AttnProcessor:
                 query = apply_rotary_pos_emb(query, freqs, q_xpos_scale)
                 key = apply_rotary_pos_emb(key, freqs, k_xpos_scale)
 
+        # mask. e.g. inference got a batch with different target durations, mask out the padding
+        # (always at inference; in training only if attn_mask_enabled)
+        use_mask = mask is not None and (self.attn_mask_enabled or not attn.training)
+
         if self.attn_backend == "torch":
-            # mask. e.g. inference got a batch with different target durations, mask out the padding
-            if self.attn_mask_enabled and mask is not None:
+            if use_mask:
                 attn_mask = mask
-                attn_mask = attn_mask.unsqueeze(1).unsqueeze(1)  # 'b n -> b 1 1 n'
-                attn_mask = attn_mask.expand(batch_size, attn.heads, query.shape[-2], key.shape[-2])
+                # 'b n -> b 1 1 n', left to broadcast: an expanded mask is materialised as a dense b h n n tensor
+                attn_mask = attn_mask.unsqueeze(1).unsqueeze(1)
             else:
                 attn_mask = None
 
@@ -598,7 +610,7 @@ class AttnProcessor:
             query = query.transpose(1, 2)  # [b, h, n, d] -> [b, n, h, d]
             key = key.transpose(1, 2)
             value = value.transpose(1, 2)
-            if self.attn_mask_enabled and mask is not None:
+            if use_mask:
                 query, indices, q_cu_seqlens, q_max_seqlen_in_batch, _ = unpad_input(query, mask)
                 key, _, k_cu_seqlens, k_max_seqlen_in_batch, _ = unpad_input(key, mask)
                 value, _, _, _, _ = unpad_input(value, mask)
