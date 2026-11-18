@@ -152,9 +152,9 @@ class CFM(nn.Module):
             cond_mask, cond, torch.zeros_like(cond)
         )  # allow direct control (cut cond audio) with lens passed in
 
-        if batch > 1:
+        if batch > 1 and (duration < max_duration).any():  # padded batch: the DiT masks out the padding
             mask = lens_to_mask(duration)
-        else:  # save memory and speed up, as single inference need no mask currently
+        else:  # save memory and speed up, as nothing is padded (e.g. single inference) and no mask is needed
             mask = None
 
         # neural ode
@@ -191,8 +191,10 @@ class CFM(nn.Module):
             return pred + (pred - null_pred) * cfg_strength
 
         # noise input
-        # to make sure batch inference result is same with different batch size, and for sure single inference
-        # still some difference maybe due to convolutional layers
+        # to make sure batch inference result is same with different batch size, and for sure single inference:
+        # each row draws its noise at its own duration (with a seed, the noise of a single inference), and the DiT
+        # masks out the padding (attention, conv position embedding, text encoder), so a row of a padded batch
+        # generates what it generates alone, up to floating point differences of batched kernels
         y0 = []
         for dur in duration:
             if exists(seed):
